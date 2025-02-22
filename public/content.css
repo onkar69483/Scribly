@@ -1,0 +1,272 @@
+:root {
+    --yt-red: #ff0000;
+    --yt-dark: #0f0f0f;
+    --yt-text: #f1f1f1;
+    --yt-hover: #263850;
+    --yt-border: #303030;
+    --yt-popup-bg: #282828;
+}
+
+/* Button Styles */
+.yt-annotate-btn {
+    background: transparent;
+    color: var(--yt-text);
+    border: none;
+    padding: 7px; /* Decreased padding */
+    border-radius: 50%;
+    cursor: pointer;
+    width: 32px; /* Decreased width */
+    height: 32px; /* Decreased height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    margin: 0 8px;
+    position: relative;
+    top: 6px; /* Moved down a bit */
+}
+
+.yt-annotate-btn:hover {
+    background: var(--yt-hover);
+    transform: scale(1.05);
+}
+
+.yt-annotate-btn svg {
+    width: 18px; /* Decreased SVG size */
+    height: 18px; /* Decreased SVG size */
+}
+
+/* Popup Styles */
+.yt-annotation-popup {
+    position: fixed;
+    background: var(--yt-popup-bg);
+    padding: 24px;
+    padding-top: 52px; /* Increased top padding to accommodate close button */
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    width: min(400px, 90vw);
+    border: 1px solid var(--yt-border);
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    z-index: 10000;
+    color: var(--yt-text);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.annotation-text {
+    width: 100%;
+    min-height: 120px;
+    max-height: 300px;
+    padding: 16px;
+    border: 1px solid var(--yt-border);
+    border-radius: 12px;
+    background: var(--yt-dark);
+    color: var(--yt-text);
+    font-family: inherit;
+    resize: vertical;
+    font-size: 14px;
+    line-height: 1.6;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.annotation-text:focus {
+    outline: none;
+    border-color: var(--yt-red);
+    box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
+}
+
+.save-annotation {
+    width: 100%;
+    padding: 14px;
+    background: var(--yt-red);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.save-annotation:hover {
+    background: #e60000;
+    transform: translateY(-1px);
+}
+
+.save-annotation:active {
+    transform: translateY(0);
+}
+
+/* Close and Edit Buttons */
+.close-annotation,
+.close-popup {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--yt-text);
+    border: none;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.close-annotation {
+    position: absolute;
+    top: 12px; /* Adjusted from 16px to 12px */
+    right: 12px; /* Adjusted from 16px to 12px */
+}
+
+.close-annotation:hover,
+.close-popup:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--yt-red);
+    transform: rotate(90deg);
+}
+
+/* Marker Styles */
+.annotation-marker {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--yt-red);
+    transform: rotate(45deg);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease;
+    z-index: 9999;
+    top: -2px;
+}
+
+.annotation-marker:hover {
+    animation: spin-scale 2s linear infinite; /* Slower spin while hovering */
+    box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
+}
+
+/* Spinning and Scaling Animation */
+@keyframes spin-scale {
+    0% {
+        transform: rotate(45deg) scale(1);
+    }
+    25% {
+        transform: rotate(135deg) scale(1.2);
+    }
+    50% {
+        transform: rotate(225deg) scale(1.4);
+    }
+    75% {
+        transform: rotate(315deg) scale(1.2);
+    }
+    100% {
+        transform: rotate(405deg) scale(1);
+    }
+}
+
+/* Annotation Popup Styles */
+.annotation-popup {
+    position: absolute;
+    background: var(--yt-popup-bg);
+    padding: 16px 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--yt-border);
+    color: var(--yt-text);
+    font-size: 14px;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    z-index: 10001;
+    width: min(300px, 90vw);
+    line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.annotation-content {
+    margin: 8px 0 24px 0;
+}
+
+.popup-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.edit-annotation {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--yt-text);
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.edit-annotation:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--yt-red);
+}
+
+/* Notification */
+.yt-notification {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--yt-popup-bg);
+    color: var(--yt-text);
+    padding: 14px 28px;
+    border-radius: 12px;
+    z-index: 10002;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 14px;
+    max-width: 90vw;
+    text-align: center;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translate(-50%, 100%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .yt-annotation-popup {
+        padding: 20px;
+        padding-top: 48px; /* Adjusted for mobile */
+        width: 85vw;
+    }
+
+    .annotation-text {
+        min-height: 100px;
+    }
+
+    .annotation-popup {
+        width: 250px;
+    }
+}
