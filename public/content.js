@@ -3,7 +3,7 @@
   let hoverTimeout = null;
   let guideShown = false;
 
-  const generateId = () => `note-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const generateId = () => `note-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 
   function createAnnotationButton() {
     const controls = document.querySelector(".ytp-left-controls");
@@ -31,7 +31,7 @@
 
   function showGuidePopup(button) {
     if (guideShown) return;
-    
+  
     const guide = document.createElement("div");
     guide.classList.add("yt-guide-popup");
     guide.innerHTML = `
@@ -47,16 +47,23 @@
       </div>
       <div class="guide-arrow"></div>
     `;
-
+  
     document.body.appendChild(guide);
-
+  
     // Position the guide
     const buttonRect = button.getBoundingClientRect();
     const guideRect = guide.getBoundingClientRect();
-    
-    guide.style.left = `${buttonRect.left - (guideRect.width/2) + (buttonRect.width/2)}px`;
-    guide.style.bottom = `${window.innerHeight - buttonRect.top + 10}px`;
-
+  
+    let left = buttonRect.left - (guideRect.width / 2) + (buttonRect.width / 2) - 10;
+    let bottom = window.innerHeight - buttonRect.top + 10;
+  
+    // Ensure the guide stays within the viewport
+    if (left < 0) left = 10;
+    if (left + guideRect.width > window.innerWidth) left = window.innerWidth - guideRect.width - 10;
+  
+    guide.style.left = `${left}px`;
+    guide.style.bottom = `${bottom}px`;
+  
     // Add close functionality
     const closeButton = guide.querySelector(".guide-close");
     closeButton.onclick = () => {
@@ -67,12 +74,12 @@
         guideShown = true;
       }, 300);
     };
-
+  
     // Show with animation
     requestAnimationFrame(() => {
       guide.classList.add("guide-show");
     });
-
+  
     // Auto-hide after 8 seconds
     setTimeout(() => {
       if (guide && guide.parentElement) {
@@ -83,18 +90,18 @@
 
   function toggleAnnotationPopup() {
     removeActivePopup();
-
+  
     const video = document.querySelector("video");
     if (!video) return;
-
+  
     video.pause();
-
+  
     const currentTime = video.currentTime;
-
+  
     const popup = document.createElement("div");
     popup.id = "yt-annotation-popup";
     popup.classList.add("yt-annotation-popup");
-
+  
     popup.innerHTML = `
       <textarea 
         id="annotation-text" 
@@ -109,16 +116,16 @@
         </svg>
       </button>
     `;
-
+  
     document.body.appendChild(popup);
     activePopup = popup;
-
+  
     const textarea = popup.querySelector("#annotation-text");
     textarea.focus();
-
+  
     document.addEventListener('click', handleClickOutside);
     popup.addEventListener('click', (e) => e.stopPropagation());
-
+  
     document.getElementById("save-annotation").onclick = () => saveAnnotation(currentTime);
     document.getElementById("close-annotation").onclick = () => removeActivePopup();
   }
@@ -182,15 +189,15 @@
 
   function saveAnnotation(timestamp) {
     const text = document.getElementById("annotation-text").value;
-
+  
     if (!text.trim()) {
       showNotification("Please enter some text for your note");
       return;
     }
-
+  
     const videoId = getVideoId();
     if (!videoId) return;
-
+  
     chrome.storage.local.get({ annotations: {} }, (data) => {
       const newAnnotation = {
         id: generateId(),
@@ -198,15 +205,15 @@
         text,
         createdAt: Date.now()
       };
-
+  
       const annotations = data.annotations[videoId] || [];
       annotations.push(newAnnotation);
-
+  
       const updatedAnnotations = {
         ...data.annotations,
         [videoId]: annotations
       };
-
+  
       chrome.storage.local.set({ annotations: updatedAnnotations }, () => {
         showNotification("Note saved successfully!");
         removeActivePopup();
@@ -281,16 +288,16 @@
   function loadAnnotations() {
     const videoId = getVideoId();
     if (!videoId) return;
-
+  
     chrome.storage.local.get({ annotations: {} }, (data) => {
       document.querySelectorAll(".annotation-marker").forEach(el => el.remove());
-
+  
       const video = document.querySelector("video");
       const progressBar = document.querySelector(".ytp-progress-bar");
       if (!video || !progressBar) return;
-
+  
       const videoAnnotations = data.annotations[videoId] || [];
-
+  
       videoAnnotations.forEach(annotation => {
         const marker = document.createElement("div");
         marker.classList.add("annotation-marker");
@@ -298,14 +305,14 @@
         marker.dataset.text = annotation.text;
         marker.dataset.time = formatTime(annotation.timestamp);
         marker.dataset.id = annotation.id;
-
+  
         marker.addEventListener("mouseenter", (e) => showAnnotationPopup(e, marker));
         marker.addEventListener("mouseleave", hideAnnotationPopup);
         marker.addEventListener("click", (e) => {
           e.stopPropagation();
           video.currentTime = annotation.timestamp;
         });
-
+  
         progressBar.appendChild(marker);
       });
     });
