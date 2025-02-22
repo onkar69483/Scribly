@@ -1,10 +1,13 @@
+
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { Search, Clock, Play, Trash2, BookOpen, Calendar, Download, Upload, FileText, X, Filter, ChevronDown } from 'lucide-react';
+import { Search, Clock, Play, Trash2, BookOpen, Calendar, Download, Upload, FileText, X, Filter, ChevronDown, Check } from 'lucide-react';
 
 // Modal Component with improved styling
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
-  
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
@@ -20,7 +23,7 @@ const Modal = ({ isOpen, onClose, children }) => {
 // Enhanced Dropdown Component
 const Dropdown = ({ value, onChange, options, label }) => {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   return (
     <div className="relative">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
@@ -33,7 +36,7 @@ const Dropdown = ({ value, onChange, options, label }) => {
         <span>{options.find(opt => opt.value === value)?.label || 'Select...'}</span>
         <ChevronDown className="h-4 w-4 text-gray-500" />
       </button>
-      
+
       {isOpen && (
         <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl">
           {options.map((option) => (
@@ -64,6 +67,40 @@ const Dashboard = () => {
   const [dateFilter, setDateFilter] = useState("all");
   const [lengthFilter, setLengthFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [editingNoteId, setEditingNoteId] = useState(null);
+  const [editText, setEditText] = useState("");
+
+  const onDeleteNote = (noteId) => {
+    if (!selectedVideo) return;
+    const updatedNotes = selectedVideo.notes.filter((note) => note.id !== noteId);
+    setAllAnnotations((prevAnnotations) => {
+      const updatedAnnotations = { ...prevAnnotations };
+      if (updatedNotes.length === 0) {
+        delete updatedAnnotations[selectedVideo.videoId];
+      } else {
+        updatedAnnotations[selectedVideo.videoId] = updatedNotes;
+      }
+      chrome.storage.local.set({ annotations: updatedAnnotations }, () => {
+        console.log("Note deleted successfully!");
+      });
+      return updatedAnnotations;
+    });
+    setSelectedVideo(updatedNotes.length === 0 ? null : { ...selectedVideo, notes: updatedNotes });
+  };
+  const onDeleteAllNotes = () => {
+    if (!selectedVideo) return;
+    // Remove all notes for the selected video
+    const updatedAnnotations = { ...allAnnotations };
+    // console.log("Update Annotations", updatedAnnotations);
+    delete updatedAnnotations[selectedVideo.videoId];
+    // Update the state
+    setAllAnnotations(updatedAnnotations);
+    // Update chrome.storage.local
+    chrome.storage.local.set({ annotations: updatedAnnotations }, () => {
+      console.log("All notes deleted successfully!");
+      setSelectedVideo(null); // Close the modal after deletion
+    });
+  };
 
   useEffect(() => {
     loadAllAnnotations();
@@ -73,7 +110,6 @@ const Dashboard = () => {
       }
     });
   }, []);
-
   const loadAllAnnotations = () => {
     chrome.storage.local.get("annotations", (data) => {
       if (data.annotations) {
@@ -129,7 +165,7 @@ const Dashboard = () => {
       
       ${video.notes.map(note => `${formatTime(note.timestamp)} - ${note.text}`).join('\n\n')}
     `;
-    
+
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -172,6 +208,63 @@ const Dashboard = () => {
     }
   };
 
+  const onEditNote = (noteId) => {
+    if (!selectedVideo) return;
+
+    // Find the note to edit
+    const noteToEdit = selectedVideo.notes.find((note) => note.id === noteId);
+
+    if (noteToEdit) {
+      setEditingNoteId(noteId);
+      setEditText(noteToEdit.text);
+    }
+  };
+
+  const saveEditedNote = () => {
+    if (!selectedVideo || editingNoteId === null) return;
+
+    const updatedNotes = selectedVideo.notes.map((note) =>
+      note.id === editingNoteId ? { ...note, text: editText } : note
+    );
+
+    setAllAnnotations((prevAnnotations) => {
+      const updatedAnnotations = { ...prevAnnotations };
+      updatedAnnotations[selectedVideo.videoId] = updatedNotes;
+
+      chrome.storage.local.set({ annotations: updatedAnnotations }, () => {
+        console.log("Note edited successfully!");
+      });
+
+      return updatedAnnotations;
+    });
+
+    setSelectedVideo({ ...selectedVideo, notes: updatedNotes });
+    setEditingNoteId(null);
+    setEditText("");
+  };
+
+  const handleInputChange = (e) => {
+    setEditText(e.target.value);
+  };
+
+  const handleSaveEdit = () => {
+    saveEditedNote();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      saveEditedNote();
+    }
+  };
+
+  const handleEditClick = (note) => {
+    onEditNote(note.id);
+  };
+
+  const handleSaveClick = () => {
+    saveEditedNote();
+  };
+
   const getStats = () => {
     const totalNotes = Object.values(allAnnotations).reduce((sum, notes) => sum + notes.length, 0);
     const totalVideos = Object.keys(allAnnotations).length;
@@ -198,7 +291,7 @@ const Dashboard = () => {
         "week": 7 * 24 * 60 * 60 * 1000,
         "month": 30 * 24 * 60 * 60 * 1000
       };
-      filtered = filtered.filter(video => 
+      filtered = filtered.filter(video =>
         (now - video.lastActive) <= timeFrames[dateFilter]
       );
     }
@@ -209,8 +302,8 @@ const Dashboard = () => {
         "medium": [6, 15],
         "many": [16, Infinity]
       };
-      filtered = filtered.filter(video => 
-        video.notes.length >= lengthRanges[lengthFilter][0] && 
+      filtered = filtered.filter(video =>
+        video.notes.length >= lengthRanges[lengthFilter][0] &&
         video.notes.length <= lengthRanges[lengthFilter][1]
       );
     }
@@ -238,17 +331,17 @@ const Dashboard = () => {
             return 0;
         }
       })
-      .filter(video => 
+      .filter(video =>
         video.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         video.notes.some(note => note.text.toLowerCase().includes(searchTerm.toLowerCase()))
       )
   );
 
-  const NotesModal = ({ video, onClose }) => (
+  const NotesModal = ({ video, onClose, onDeleteNote, onDeleteAllNotes }) => (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{video.title}</h2>
+        <div className='max-w-[400]'>
+          <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">{video.title}</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{video.author}</p>
         </div>
         <div className="flex gap-2">
@@ -278,25 +371,81 @@ const Dashboard = () => {
           </button>
         </div>
       </div>
-      
+      <button
+        onClick={() => onDeleteAllNotes()}
+        className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg z-50 cursor-pointer"
+      >
+        <Trash2 className="h-4 w-4 mr-2" /> Delete All Notes
+      </button>
       <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
         {video.notes.map((note) => (
           <div
             key={note.id}
-            className="flex items-start gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             <span className="px-2 py-1 text-sm font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded">
               {formatTime(note.timestamp)}
             </span>
-            <p className="text-gray-700 dark:text-gray-300 flex-1">{note.text}</p>
+
+            {editingNoteId === note.id ? (
+              <input
+                type="text"
+                value={editText}
+                onChange={handleInputChange}
+                onBlur={handleSaveEdit}
+                onKeyDown={handleKeyDown}
+                autoFocus
+                className="flex-1 px-2 py-1 bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none text-gray-700 dark:text-gray-300"
+              />
+            ) : (
+              <p className="text-gray-700 dark:text-gray-300 flex-1">{note.text}</p>
+            )}
+
+            <div className="flex items-center gap-2">
+              {editingNoteId === note.id ? (
+                <button
+                  onClick={handleSaveClick}
+                  className="relative group p-1"
+                >
+                  <div className="absolute inset-0 hidden group-hover:flex items-center justify-center bg-gray-300/30 dark:bg-gray-700/50 rounded-full"></div>
+                  <Check color="#2ad813" className="h-4 w-4 text-white dark:text-gray-300 relative" />
+                </button>
+              ) : (
+                <button className="relative group p-1" onClick={() => handleEditClick(note)}>
+                  <div className="absolute inset-0 hidden group-hover:flex items-center justify-center bg-gray-300/30 dark:bg-gray-700/50 rounded-full"></div>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4 text-white dark:text-gray-300 relative"
+                  >
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+              )}
+
+              <button
+                onClick={() => onDeleteNote(note.id)}
+                className="hover:bg-red-50 dark:hover:bg-red-900/50 rounded-full text-red-500 dark:text-red-400 p-1"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         ))}
       </div>
     </div>
   );
 
+
   const FilterPanel = () => (
-    <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4 z-20">
+    <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4 z-20 text-white">
       <Dropdown
         label="Time Period"
         value={dateFilter}
@@ -308,7 +457,7 @@ const Dashboard = () => {
           { value: "month", label: "This Month" }
         ]}
       />
-      
+
       <Dropdown
         label="Notes Count"
         value={lengthFilter}
@@ -320,7 +469,7 @@ const Dashboard = () => {
           { value: "many", label: "Many (15+)" }
         ]}
       />
-      
+
       <Dropdown
         label="Sort By"
         value={sortBy}
@@ -359,7 +508,7 @@ const Dashboard = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              
+              {/* Filters */}
               <div className="relative">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
@@ -406,8 +555,8 @@ const Dashboard = () => {
         {/* Enhanced Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {getStats().map((stat) => (
-            <div 
-              key={stat.label} 
+            <div
+              key={stat.label}
               className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all duration-200"
             >
               <div className="flex items-center justify-between mb-4">
@@ -506,14 +655,13 @@ const Dashboard = () => {
       </div>
 
       {/* Notes Modal */}
-      <Modal
-        isOpen={selectedVideo !== null}
-        onClose={() => setSelectedVideo(null)}
-      >
+      <Modal isOpen={selectedVideo !== null} onClose={() => setSelectedVideo(null)}>
         {selectedVideo && (
           <NotesModal
             video={selectedVideo}
             onClose={() => setSelectedVideo(null)}
+            onDeleteNote={onDeleteNote}
+            onDeleteAllNotes={onDeleteAllNotes}
           />
         )}
       </Modal>
