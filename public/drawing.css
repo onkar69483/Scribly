@@ -1,0 +1,257 @@
+/* drawing.css */
+.youtube-drawing-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    pointer-events: none;
+    background: transparent;
+    transition: opacity 0.2s ease;
+}
+
+.youtube-drawing-canvas.active {
+    pointer-events: auto;
+    cursor: crosshair;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.youtube-drawing-canvas.show-drawing {
+    pointer-events: none;
+}
+
+.youtube-drawing-toolbar {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(28, 28, 28, 0.95);
+    border-radius: 12px;
+    padding: 16px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-family: 'YouTube Sans', 'Roboto', sans-serif;
+    backdrop-filter: blur(10px);
+    min-width: 280px;
+    transform: translateY(20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.youtube-drawing-toolbar.visible {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.drawing-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tool-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.color-picker-container, .size-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.color-label {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-left: 6px;
+}
+
+.color-picker-container input[type="color"] {
+    width: 38px;
+    height: 38px;
+    padding: 1px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    cursor: pointer;
+    background: transparent;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.color-picker-container input[type="color"]:hover {
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.size-slider-container input[type="range"] {
+    flex: 1;
+    height: 6px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    -webkit-appearance: none;
+    transition: background 0.2s ease;
+}
+
+.size-slider-container input[type="range"]:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.size-slider-container input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #3498db;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.size-slider-container input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.size-preview {
+    width: 5px;
+    height: 5px;
+    background-color: #3498db;
+    border-radius: 50%;
+    margin-left: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.buttons-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+.drawing-controls button {
+    padding: 10px 0;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.drawing-controls .save-btn {
+    background: #3498db;
+    color: white;
+}
+
+.drawing-controls .save-btn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.drawing-controls .save-btn:active {
+    transform: translateY(0);
+}
+
+.drawing-controls .clear-btn {
+    background: #e74c3c;
+    color: white;
+}
+
+.drawing-controls .clear-btn:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+}
+
+.drawing-controls .clear-btn:active {
+    transform: translateY(0);
+}
+
+.drawing-controls .exit-btn {
+    background: #7f8c8d;
+    color: white;
+}
+
+.drawing-controls .exit-btn:hover {
+    background: #95a5a6;
+    transform: translateY(-2px);
+}
+
+.drawing-controls .exit-btn:active {
+    transform: translateY(0);
+}
+
+.drawing-instructions {
+    text-align: center;
+    font-size: 13px;
+    opacity: 0.7;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+/* Timeline markers */
+.youtube-drawing-markers {
+    position: absolute;
+    top: -4px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.drawing-marker {
+    position: absolute;
+    height: 4px;
+    background-color: #3498db;
+    border-radius: 2px;
+    top: 0;
+    min-width: 4px;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+.drawing-marker:hover {
+    height: 5px;
+    top: -1px;
+    z-index: 3;
+}
+
+/* Notification */
+.youtube-drawing-notification {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(52, 152, 219, 0.9);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-family: 'YouTube Sans', 'Roboto', sans-serif;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.youtube-drawing-notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Drawing toggle button */
+.drawing-toggle-btn:hover svg path {
+    fill: #2980b9;
+}
