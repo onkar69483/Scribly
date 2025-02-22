@@ -3,6 +3,11 @@
     "name": "Scribly",
     "version": "1.0",
     "description": "Add annotations to YouTube videos",
+    "icons": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    },
     "permissions": ["scripting", "activeTab", "storage"],
     "host_permissions": ["https://www.youtube.com/*"],
     "action": {
