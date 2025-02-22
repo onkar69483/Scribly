@@ -28,6 +28,8 @@
       const video = document.querySelector("video");
       if (!video) return;
   
+      video.pause();
+  
       const currentTime = video.currentTime;
   
       const popup = document.createElement("div");
@@ -177,6 +179,8 @@
       if (activePopup) {
         activePopup.remove();
         activePopup = null;
+        const video = document.querySelector("video");
+        if (video) video.play();
       }
     }
   
@@ -192,6 +196,7 @@
         const video = document.querySelector("video");
         if (!video) return;
   
+        video.pause();
         video.currentTime = annotation.timestamp;
         toggleAnnotationPopup();
   
