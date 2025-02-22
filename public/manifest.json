@@ -20,6 +20,12 @@
         "js": ["content.js"],
         "css": ["content.css"]
       }
+    ],
+    "web_accessible_resources": [
+      {
+        "resources": ["dashboard.html"],
+        "matches": ["<all_urls>"]
+      }
     ]
   }
   

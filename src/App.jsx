@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Search, Clock, Trash2, ExternalLink, Info } from "lucide-react";
+import { Search, Clock, Trash2, ExternalLink, Info, LayoutDashboard, ChevronRight  } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function App() {
@@ -95,6 +95,18 @@ export default function App() {
                   {annotations.length} {annotations.length === 1 ? "note" : "notes"}
                 </span>
               </div>
+              <motion.button
+                onClick={() => {
+                  chrome.tabs.create({ url: 'dashboard.html' });
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="group flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                <LayoutDashboard className="h-3 w-3" />
+                <span className="text-xs font-medium">Dashboard</span>
+                <ChevronRight className="h-3 w-3 transform group-hover:translate-x-0.5 transition-transform" />
+              </motion.button>
             </div>
           </div>
         </motion.div>
