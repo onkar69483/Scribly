@@ -270,3 +270,111 @@
         width: 250px;
     }
 }
+
+/* Guide Popup Styles */
+.yt-guide-popup {
+    position: fixed;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+    pointer-events: auto;
+  }
+  
+  .guide-content {
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 12px;
+    width: 280px;
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .guide-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+  
+  .guide-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+  
+  .guide-title {
+    font-family: "YouTube Sans", "Roboto", sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: #0f0f0f;
+    flex-grow: 1;
+  }
+  
+  .guide-text {
+    font-family: "Roboto", sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #606060;
+    margin-bottom: 16px;
+  }
+  
+  .guide-close {
+    background: #f00;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 18px;
+    font-family: "Roboto", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: block;
+    width: 100%;
+  }
+  
+  .guide-close:hover {
+    background: #d00;
+  }
+  
+  .guide-arrow {
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #ffffff;
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
+  }
+  
+  .guide-show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  
+  .guide-fade-out {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  
+  /* Dark mode support */
+  html[dark] .guide-content {
+    background: #272727;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  html[dark] .guide-title {
+    color: #ffffff;
+  }
+  
+  html[dark] .guide-text {
+    color: #aaaaaa;
+  }
+  
+  html[dark] .guide-arrow {
+    border-top-color: #272727;
+  }
