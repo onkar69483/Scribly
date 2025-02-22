@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name": "Scribly",
+    "version": "1.0",
+    "description": "Add annotations to YouTube videos",
+    "icons": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    },
+    "permissions": ["scripting", "activeTab", "storage"],
+    "host_permissions": ["https://www.youtube.com/*"],
+    "action": {
+      "default_popup": "index.html",
+      "default_icon": "icon.png"
+    },
+    "content_scripts": [
+      {
+        "matches": ["https://www.youtube.com/*"],
+        "js": ["content.js"],
+        "css": ["content.css"]
+      }
+    ]
+  }
+  
