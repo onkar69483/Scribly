@@ -44,50 +44,91 @@ class YouTubeDrawingTool {
 
     setupKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
+            // Only process shortcuts if not in an input or textarea
             if (!['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) {
-                // Toggle drawing mode with 'N' key
-                if (e.key.toLowerCase() === 'n') {
+                // Toggle drawing mode with Ctrl+N
+                if (e.ctrlKey && e.key.toLowerCase() === 'v') {
+                    e.preventDefault(); // Prevent browser's "New window" action
                     this.toggleDrawingMode();
                 }
                 
-                // Use 'D' key press to start drawing
-                if (e.key.toLowerCase() === 'd' && this.isDrawingMode) {
+                // Use Ctrl+D to start drawing
+                if (e.ctrlKey && e.key.toLowerCase() === 'd' && this.isDrawingMode) {
+                    e.preventDefault(); // Prevent browser's "Bookmark" action
                     this.isDKeyPressed = true;
                     if (this.currentTool === 'brush' || this.currentTool === 'highlight') {
                         this.startDrawingIfMouseOnCanvas();
+                    } else if (this.currentTool === 'shape' && this.mousePosition) {
+                        // Initialize shape drawing
+                        const rect = this.canvas.getBoundingClientRect();
+                        this.shapeStart = {
+                            x: this.mousePosition.x - rect.left,
+                            y: this.mousePosition.y - rect.top
+                        };
+                        
+                        // Initialize temp canvas for shape preview
+                        this.tempCanvas = document.createElement('canvas');
+                        this.tempCanvas.width = this.canvas.width;
+                        this.tempCanvas.height = this.canvas.height;
+                        const tempCtx = this.tempCanvas.getContext('2d');
+                        tempCtx.clearRect(0, 0, this.tempCanvas.width, this.tempCanvas.height);
+                        tempCtx.drawImage(this.canvas, 0, 0);
                     }
                 }
                 
-                // Quick tool selection shortcuts
-                if (this.isDrawingMode) {
+                // Quick tool selection shortcuts with Ctrl
+                if (this.isDrawingMode && e.ctrlKey) {
                     switch (e.key.toLowerCase()) {
-                        case 'b': this.setTool('brush'); break;
-                        case 'h': this.setTool('highlight'); break;
-                        case 's': this.setTool('shape'); break;
-                        case 'x': this.setTool('text'); break;
+                        case 'b': 
+                            e.preventDefault();
+                            this.setTool('brush'); 
+                            break;
+                        case 'h': 
+                            e.preventDefault();
+                            this.setTool('highlight'); 
+                            break;
+                        case 's': 
+                            e.preventDefault();
+                            this.setTool('shape'); 
+                            break;
+                        case 'x': 
+                            e.preventDefault();
+                            this.setTool('text'); 
+                            break;
                     }
                 }
                 
-                // Add ESC key to exit drawing mode
+                // Keep ESC key without modifier to exit drawing mode
                 if (e.key === 'Escape' && this.isDrawingMode) {
                     this.exitDrawingMode();
                 }
             }
         });
-
+    
         // Handle key up to stop drawing
         document.addEventListener('keyup', (e) => {
-            if (e.key.toLowerCase() === 'd') {
+            if (e.ctrlKey && e.key.toLowerCase() === 'd') {
                 this.isDKeyPressed = false;
                 this.isDrawing = false;
                 
                 // Finalize shape if we were drawing a shape
                 if (this.currentTool === 'shape' && this.shapeStart && this.tempCanvas) {
-                    this.ctx.drawImage(this.tempCanvas, 0, 0);
+                    // The shape is already drawn on the main canvas from the last mousemove event
                     this.shapeStart = null;
+                    this.tempCanvas = null; // Release the temp canvas
                 }
             }
         });
+        
+        // Add preference system for modifier key
+        this.modifierKey = 'ctrlKey'; // Default modifier
+        
+        // Method to change modifier key preference
+        this.setModifierKey = (key) => {
+            if (['ctrlKey', 'shiftKey', 'altKey', 'metaKey'].includes(key)) {
+                this.modifierKey = key;
+            }
+        };
     }
 
     setTool(tool) {
@@ -210,7 +251,7 @@ class YouTubeDrawingTool {
     setupDrawingButton(controls) {
         const drawButton = document.createElement('button');
         drawButton.className = 'ytp-button drawing-toggle-btn';
-        drawButton.setAttribute('title', 'Draw on video (Press N)');
+        drawButton.setAttribute('title', 'Draw on video (Press Ctrl+V)');
         drawButton.innerHTML = `
             <svg height="100%" version="1.1" viewBox="0 0 24 24" width="100%">
                 <path d="M7 14c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-2 2 .92 1.22 2.49 2 4 2 2.21 0 4-1.79 4-4 0-1.66-1.34-3-3-3zm13.71-9.37l-1.34-1.34c-.39-.39-1.02-.39-1.41 0L9 12.25 11.75 15l8.96-8.96c.39-.39.39-1.02 0-1.41z"
@@ -224,7 +265,7 @@ class YouTubeDrawingTool {
     setupDrawingElements() {
         const videoContainer = document.querySelector('.html5-video-container');
         if (!videoContainer) return;
-
+    
         // Get video element
         this.video = document.querySelector('video');
         
@@ -256,28 +297,28 @@ class YouTubeDrawingTool {
             <div class="tool-selector">
                 <h4>Tools</h4>
                 <div class="tool-buttons">
-                    <button class="tool-button active" data-tool="brush" title="Brush Tool (B)">
+                    <button class="tool-button active" data-tool="brush" title="Brush Tool (Ctrl+B)">
                         <svg viewBox="0 0 24 24" width="22" height="22">
                             <path d="M20.71 4.63l-1.34-1.34c-.39-.39-1.02-.39-1.41 0L9 12.25 11.75 15l8.96-8.96c.39-.39.39-1.02 0-1.41z"
                                 fill="currentColor"></path>
                         </svg>
                         <span>Brush</span>
                     </button>
-                    <button class="tool-button" data-tool="highlight" title="Highlighter Tool (H)">
+                    <button class="tool-button" data-tool="highlight" title="Highlighter Tool (Ctrl+H)">
                         <svg viewBox="0 0 24 24" width="22" height="22">
                             <path d="M18.5 1.15c-.53 0-1.04.19-1.43.58l-5.81 5.82 5.65 5.65 5.82-5.81c.77-.78.77-2.05 0-2.83l-2.84-2.84c-.39-.39-.89-.57-1.39-.57zM10.3 8.5l-4.7 4.7.7.7L2 18v3h3l4.11-4.1.71.71 4.7-4.7-4.22-4.41z"
                                 fill="currentColor"></path>
                         </svg>
                         <span>Highlight</span>
                     </button>
-                    <button class="tool-button" data-tool="shape" title="Shape Tool (S)">
+                    <button class="tool-button" data-tool="shape" title="Shape Tool (Ctrl+S)">
                         <svg viewBox="0 0 24 24" width="22" height="22">
                             <path d="M4.5 5.5h5v2h-5v-2zm7 2h7v-2h-7v2zm-7 4h9v-2h-9v2zm11 0h3v-2h-3v2zm-11 4h7v-2h-7v2zm9 0h5v-2h-5v2zm-9 4h9v-2h-9v2zm11 0h3v-2h-3v2z"
                                 fill="currentColor"></path>
                         </svg>
                         <span>Shapes</span>
                     </button>
-                    <button class="tool-button" data-tool="text" title="Text Tool (X)">
+                    <button class="tool-button" data-tool="text" title="Text Tool (Ctrl+X)">
                         <svg viewBox="0 0 24 24" width="22" height="22">
                             <path d="M5 4v3h5.5v12h3V7H19V4z" fill="currentColor"></path>
                         </svg>
@@ -344,6 +385,16 @@ class YouTubeDrawingTool {
                 </div>
             </div>
             
+            <div class="modifier-key-selector">
+                <h4>Modifier Key</h4>
+                <select id="modifierKeySelect">
+                    <option value="ctrlKey" selected>Ctrl</option>
+                    <option value="shiftKey">Shift</option>
+                    <option value="altKey">Alt</option>
+                    <option value="metaKey">Meta (⌘)</option>
+                </select>
+            </div>
+            
             <div class="action-buttons">
                 <button id="saveDrawing" class="action-btn save-btn" title="Save Drawing">
                     <svg viewBox="0 0 24 24" width="18" height="18">
@@ -376,23 +427,23 @@ class YouTubeDrawingTool {
                 <div class="help-title">Keyboard Shortcuts</div>
                 <div class="keyboard-shortcuts">
                     <div class="shortcut-item">
-                        <span class="key">N</span>
+                        <span class="key"><span class="modifier">Ctrl</span>+N</span>
                         <span>Toggle drawing</span>
                     </div>
                     <div class="shortcut-item">
-                        <span class="key">D</span>
+                        <span class="key"><span class="modifier">Ctrl</span>+D</span>
                         <span>Hold to draw</span>
                     </div>
                     <div class="shortcut-item">
-                        <span class="key">B</span>
+                        <span class="key"><span class="modifier">Ctrl</span>+B</span>
                         <span>Brush tool</span>
                     </div>
                     <div class="shortcut-item">
-                        <span class="key">H</span>
+                        <span class="key"><span class="modifier">Ctrl</span>+H</span>
                         <span>Highlight tool</span>
                     </div>
                     <div class="shortcut-item">
-                        <span class="key">S</span>
+                        <span class="key"><span class="modifier">Ctrl</span>+S</span>
                         <span>Shape tool</span>
                     </div>
                     <div class="shortcut-item">
@@ -469,6 +520,7 @@ class YouTubeDrawingTool {
 
     setupEventListeners() {
         // Canvas mouse events
+        // Update this part in the setupEventListeners function
         this.canvas.addEventListener('mousemove', (e) => {
             const rect = this.canvas.getBoundingClientRect();
             this.mousePosition = {
@@ -518,6 +570,28 @@ class YouTubeDrawingTool {
             this.isDrawing = false;
         });
         
+        // Setup modifier key preference
+        this.modifierKey = 'ctrlKey'; // Default to Ctrl key
+        
+        // Add handler for modifier key selection
+        const modifierKeySelect = document.getElementById('modifierKeySelect');
+        modifierKeySelect.addEventListener('change', (e) => {
+            this.modifierKey = e.target.value;
+            
+            // Update the displayed shortcuts in the help section
+            const modifierElements = document.querySelectorAll('.shortcut-item .modifier');
+            const modifierText = e.target.options[e.target.selectedIndex].text;
+            modifierElements.forEach(el => {
+                el.textContent = modifierText;
+            });
+            
+            // Update tooltips on tool buttons
+            document.querySelector('[data-tool="brush"]').title = `Brush Tool (${modifierText}+B)`;
+            document.querySelector('[data-tool="highlight"]').title = `Highlighter Tool (${modifierText}+H)`;
+            document.querySelector('[data-tool="shape"]').title = `Shape Tool (${modifierText}+S)`;
+            document.querySelector('[data-tool="text"]').title = `Text Tool (${modifierText}+X)`;
+        });
+
         // Tool selection
         const toolButtons = document.querySelectorAll('.tool-button');
         toolButtons.forEach(button => {
@@ -627,13 +701,22 @@ class YouTubeDrawingTool {
     }
 
     drawShapePreview(e) {
-        if (!this.shapeStart || !this.tempCanvas) return;
+        if (!this.shapeStart) return;
         
         const rect = this.canvas.getBoundingClientRect();
         const currentPosition = {
             x: e.clientX - rect.left,
             y: e.clientY - rect.top
         };
+        
+        // Create temp canvas if it doesn't exist
+        if (!this.tempCanvas) {
+            this.tempCanvas = document.createElement('canvas');
+            this.tempCanvas.width = this.canvas.width;
+            this.tempCanvas.height = this.canvas.height;
+            const tempCtx = this.tempCanvas.getContext('2d');
+            tempCtx.drawImage(this.canvas, 0, 0);
+        }
         
         // Clear the main canvas and redraw from temp canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
