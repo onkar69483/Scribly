@@ -3,7 +3,7 @@ class YouTubeDrawingTool {
     constructor() {
         this.isDrawingMode = false;
         this.isDrawing = false;
-        this.currentColor = '#3498db';
+        this.currentColor = '#f03e3e';
         this.lineWidth = 5;
         this.drawings = new Map();
         this.lastPosition = null;
