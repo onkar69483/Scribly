@@ -184,14 +184,47 @@ export default function App() {
       >
         <div className="w-full px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <h1 className="text-xl font-bold text-gray-800 dark:text-white">
-                YouTube Notes
-              </h1>
-              <span className="inline-flex items-center justify-center bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2.5 py-0.5 rounded-full text-sm font-medium">
-                {annotations.length} {annotations.length === 1 ? "note" : "notes"}
-              </span>
-            </div>
+            
+          <motion.div 
+              className="flex items-center space-x-3"
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              {/* Logo */}
+              <motion.div
+                initial={{ rotate: -180, scale: 0 }}
+                animate={{ rotate: 0, scale: 1 }}
+                transition={{ duration: 0.5, type: "spring" }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg"
+              >
+                      <img src="icon.png" alt="Logo" className="w-full h-full object-cover rounded-lg" />
+              </motion.div>
+              
+              {/* Brand and Subtitle */}
+              <div className="flex flex-col">
+                <h1 className="text-xl font-bold text-gray-800 dark:text-white flex items-center">
+                  Scribly
+                  <motion.span 
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="ml-2 inline-flex items-center justify-center bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2.5 py-0.5 rounded-full text-sm font-medium"
+                  >
+                    {annotations.length} {annotations.length === 1 ? "note" : "notes"}
+                  </motion.span>
+                </h1>
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-[10px] text-gray-500 dark:text-gray-400"
+                >
+                  Ultimate YouTube Note-Taking experience
+                </motion.p>
+              </div>
+            </motion.div>
+
             <motion.button
               onClick={() => {
                 chrome.tabs.create({ url: 'dashboard.html' });
