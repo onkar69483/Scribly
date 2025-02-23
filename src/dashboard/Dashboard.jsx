@@ -69,6 +69,11 @@ const Dashboard = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState(null);
   const [editText, setEditText] = useState("");
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
 
   const onDeleteNote = (noteId) => {
     if (!selectedVideo) return;
@@ -486,19 +491,30 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Enhanced Header */}
+      {/* Enhanced Header with App Icon */}
       <div className="sticky top-0 z-10 border-b border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
-                Notes Dashboard
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* App Logo and Name */}
+          <div className={`flex items-center space-x-3 transform transition-all duration-700 ${isLoaded ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'}`}>
+            <img 
+              src="/icon.png" 
+              alt="App Logo" 
+              className="w-10 h-10 rounded-lg shadow-lg transform hover:rotate-3 transition-transform duration-300"
+            />
+            <div className="flex flex-col">
+              <h1 className="text-xl font-extrabold text-white">
+                Scribly
               </h1>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Manage all your YouTube video notes
-              </p>
+              <span className="text-xs text-gray-300 font-mono tracking-wide">
+                Ultimate YouTube Note-Taking Experience
+              </span>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1 md:w-64">
+          </div>
+
+            {/* Center Section with Search and Filters */}
+            <div className={`flex items-center gap-4 flex-1 justify-center max-w-2xl mx-8 transform transition-all duration-700 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <input
                   type="text"
@@ -508,7 +524,8 @@ const Dashboard = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              {/* Filters */}
+              
+              {/* Filters Button */}
               <div className="relative">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
@@ -519,31 +536,32 @@ const Dashboard = () => {
                 </button>
                 {showFilters && <FilterPanel />}
               </div>
+            </div>
 
-              <div className="flex gap-2">
+            {/* Right Section with Export/Import */}
+            <div className={`flex items-center gap-3 transform transition-all duration-700 ${isLoaded ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
+              <button
+                onClick={exportAllNotes}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-200 transition-colors group"
+                title="Export All Notes"
+              >
+                <Download className="h-4 w-4 transform group-hover:scale-110 transition-transform" />
+              </button>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={importNotes}
+                  className="hidden"
+                  id="import-notes"
+                />
                 <button
-                  onClick={exportAllNotes}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-200 transition-colors"
-                  title="Export All Notes"
+                  onClick={() => document.getElementById('import-notes').click()}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-200 transition-colors group"
+                  title="Import Notes"
                 >
-                  <Download className="h-4 w-4" />
+                  <Upload className="h-4 w-4 transform group-hover:scale-110 transition-transform" />
                 </button>
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept=".json"
-                    onChange={importNotes}
-                    className="hidden"
-                    id="import-notes"
-                  />
-                  <button
-                    onClick={() => document.getElementById('import-notes').click()}
-                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-200 transition-colors"
-                    title="Import Notes"
-                  >
-                    <Upload className="h-4 w-4" />
-                  </button>
-                </div>
               </div>
             </div>
           </div>
