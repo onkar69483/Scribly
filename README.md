@@ -36,7 +36,7 @@ Transform your YouTube learning experience with Scribly - the ultimate Chrome ex
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/yourusername/scribly.git
+   git clone https://github.com/onkar69483/scribly.git
    cd scribly
    ```
 
