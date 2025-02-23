@@ -210,7 +210,7 @@ class YouTubeDrawingTool {
     setupDrawingButton(controls) {
         const drawButton = document.createElement('button');
         drawButton.className = 'ytp-button drawing-toggle-btn';
-        drawButton.setAttribute('title', 'Draw on video (Press T)');
+        drawButton.setAttribute('title', 'Draw on video (Press N)');
         drawButton.innerHTML = `
             <svg height="100%" version="1.1" viewBox="0 0 24 24" width="100%">
                 <path d="M7 14c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-2 2 .92 1.22 2.49 2 4 2 2.21 0 4-1.79 4-4 0-1.66-1.34-3-3-3zm13.71-9.37l-1.34-1.34c-.39-.39-1.02-.39-1.41 0L9 12.25 11.75 15l8.96-8.96c.39-.39.39-1.02 0-1.41z"
@@ -376,7 +376,7 @@ class YouTubeDrawingTool {
                 <div class="help-title">Keyboard Shortcuts</div>
                 <div class="keyboard-shortcuts">
                     <div class="shortcut-item">
-                        <span class="key">T</span>
+                        <span class="key">N</span>
                         <span>Toggle drawing</span>
                     </div>
                     <div class="shortcut-item">
@@ -759,8 +759,8 @@ class YouTubeDrawingTool {
         this.canvas.height = videoRect.height;
         
         // Position canvas exactly over video
-        this.canvas.style.top = `${videoRect.top}px`;
-        this.canvas.style.left = `${videoRect.left}px`;
+        // this.canvas.style.top = `${videoRect.top}px`;
+        // this.canvas.style.left = `${videoRect.left}px`;
         
         // Position sidebar
         if (this.sidebar) {
@@ -935,11 +935,22 @@ class YouTubeDrawingTool {
         if (!this.video || !this.currentVideoId) return;
         
         const currentTime = Math.floor(this.video.currentTime);
+        let closestTime = null;
+        let minDifference = Infinity;
         
-        if (this.drawings.has(currentTime)) {
-            const confirmed = confirm('Remove the drawing at this timestamp?');
+        // Find the closest drawing within ±5 seconds
+        for (let time of this.drawings.keys()) {
+            const difference = Math.abs(time - currentTime);
+            if (difference <= 5 && difference < minDifference) {
+                closestTime = time;
+                minDifference = difference;
+            }
+        }
+        
+        if (closestTime !== null) {
+            const confirmed = confirm(`Remove the drawing at timestamp ${closestTime}?`);
             if (confirmed) {
-                this.drawings.delete(currentTime);
+                this.drawings.delete(closestTime);
                 this.saveDrawingsToStorage();
                 this.clearCanvas();
                 this.updateTimelineMarkers();
@@ -947,9 +958,10 @@ class YouTubeDrawingTool {
                 this.showToast('Drawing deleted');
             }
         } else {
-            alert('No drawing found at the current timestamp.');
+            alert('No drawing found within ±5 seconds of the current timestamp.');
         }
     }
+    
     
     saveDrawingsToStorage() {
         if (!this.currentVideoId) return;
