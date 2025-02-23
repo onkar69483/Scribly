@@ -34,28 +34,36 @@ Transform your YouTube learning experience with Scribly - the ultimate Chrome ex
 
 ### Installation Steps
 
-1. **Fork the Repository**
-   - Visit the [Scribly repository](https://github.com/onkar69483/scribly)
-   - Click the "Fork" button in the top-right corner
-   - Wait for GitHub to create a copy in your account
+#### 1. Clone the Repository
 
-2. **Clone Your Fork**
-   ```bash
-   git clone https://github.com/onkar69483/scribly.git
-   cd scribly
-   ```
+You have two options:
 
-3. **Set Up Development Environment**
-   ```bash
-   npm install
-   npm run build
-   ```
+- **If you have forked the repository**, replace `YOUR_GITHUB_USERNAME` with your GitHub username and run:
+  ```bash
+  git clone https://github.com/YOUR_GITHUB_USERNAME/scribly.git
+  ```
 
-4. **Install in Chrome**
-   1. Open Chrome and navigate to `chrome://extensions/`
-   2. Enable "Developer mode" (top-right corner)
-   3. Click "Load unpacked"
-   4. Select the `dist` folder from your project directory
+- **If you want to clone directly**, run:
+  ```bash
+  git clone https://github.com/onkar69483/scribly.git
+  ```
+
+Then, navigate to the project folder:
+  ```bash
+  cd scribly
+  ```
+
+#### 2. Set Up Development Environment
+  ```bash
+  npm install
+  npm run build
+  ```
+
+#### 3. Install in Chrome
+  1. Open Chrome and navigate to `chrome://extensions/`
+  2. Enable "Developer mode" (top-right corner)
+  3. Click "Load unpacked"
+  4. Select the `dist` folder from your project directory
 
 ### 🔧 Troubleshooting Installation
 
