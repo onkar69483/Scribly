@@ -55,6 +55,21 @@ class YouTubeDrawingTool {
                     this.isDKeyPressed = true;
                     if (this.currentTool === 'brush' || this.currentTool === 'highlight') {
                         this.startDrawingIfMouseOnCanvas();
+                    } else if (this.currentTool === 'shape' && this.mousePosition) {
+                        // Initialize shape drawing
+                        const rect = this.canvas.getBoundingClientRect();
+                        this.shapeStart = {
+                            x: this.mousePosition.x - rect.left,
+                            y: this.mousePosition.y - rect.top
+                        };
+                        
+                        // Initialize temp canvas for shape preview
+                        this.tempCanvas = document.createElement('canvas');
+                        this.tempCanvas.width = this.canvas.width;
+                        this.tempCanvas.height = this.canvas.height;
+                        const tempCtx = this.tempCanvas.getContext('2d');
+                        tempCtx.clearRect(0, 0, this.tempCanvas.width, this.tempCanvas.height);
+                        tempCtx.drawImage(this.canvas, 0, 0);
                     }
                 }
                 
@@ -74,7 +89,7 @@ class YouTubeDrawingTool {
                 }
             }
         });
-
+    
         // Handle key up to stop drawing
         document.addEventListener('keyup', (e) => {
             if (e.key.toLowerCase() === 'd') {
@@ -83,8 +98,9 @@ class YouTubeDrawingTool {
                 
                 // Finalize shape if we were drawing a shape
                 if (this.currentTool === 'shape' && this.shapeStart && this.tempCanvas) {
-                    this.ctx.drawImage(this.tempCanvas, 0, 0);
+                    // The shape is already drawn on the main canvas from the last mousemove event
                     this.shapeStart = null;
+                    this.tempCanvas = null; // Release the temp canvas
                 }
             }
         });
@@ -469,6 +485,7 @@ class YouTubeDrawingTool {
 
     setupEventListeners() {
         // Canvas mouse events
+        // Update this part in the setupEventListeners function
         this.canvas.addEventListener('mousemove', (e) => {
             const rect = this.canvas.getBoundingClientRect();
             this.mousePosition = {
@@ -627,13 +644,22 @@ class YouTubeDrawingTool {
     }
 
     drawShapePreview(e) {
-        if (!this.shapeStart || !this.tempCanvas) return;
+        if (!this.shapeStart) return;
         
         const rect = this.canvas.getBoundingClientRect();
         const currentPosition = {
             x: e.clientX - rect.left,
             y: e.clientY - rect.top
         };
+        
+        // Create temp canvas if it doesn't exist
+        if (!this.tempCanvas) {
+            this.tempCanvas = document.createElement('canvas');
+            this.tempCanvas.width = this.canvas.width;
+            this.tempCanvas.height = this.canvas.height;
+            const tempCtx = this.tempCanvas.getContext('2d');
+            tempCtx.drawImage(this.canvas, 0, 0);
+        }
         
         // Clear the main canvas and redraw from temp canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
